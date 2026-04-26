@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Forense - Perícia e Prisão</title>
+    <script src="https://unpkg.com/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
+    <style>
+        :root {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --primary: #3498db;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 { font-size: 20px; margin-bottom: 25px; color: var(--primary); }
+        .hidden { display: none; }
+
+        .btn-menu {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .btn-menu:hover { opacity: 0.8; transform: scale(1.02); }
+        .btn-pericia { background: #5d6d7e; }
+        .btn-prisao { background: #a04000; }
+
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #bbb; }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 10px;
+            background: #2c2c2c;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #output {
+            margin-top: 20px;
+            background: #000;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: left;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            border: 1px dashed var(--primary);
+        }
+
+        .status-ia { font-size: 12px; color: #f1c40f; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div id="home" class="container">
+        <h1>SISTEMA OPERACIONAL</h1>
+        <button class="btn-menu btn-pericia" onclick="abrir('pericia')">📊 NOVO RELATÓRIO DE PERÍCIA</button>
+        <button class="btn-menu btn-prisao" onclick="abrir('prisao')">⚖️ REGISTRAR NOVA PRISÃO</button>
+    </div>
+
+    <div id="pericia" class="container hidden">
+        <h1>PERÍCIA CRIMINAL</h1>
+        
+        <div class="form-group">
+            <label>Tipo de Ocorrência:</label>
+            <select id="p-tipo">
+                <option value="acao">Ação Policial (Confronto)</option>
+                <option value="encontrado">Corpo Encontrado</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Localização do Incidente:</label>
+            <select id="p-local">
+                <option value="Plano">Plano</option>
+                <option value="Montanhoso">Montanhoso</option>
+                <option value="Edificação">Edificação</option>
+                <option value="Água">Água</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Foto do Inventário (IA buscará itens):</label>
+            <input type="file" id="p-img" accept="image/*">
+            <div id="status-p" class="status-ia"></div>
+        </div>
+
+        <button class="btn-menu" style="background: var(--success);" onclick="gerarPericia()">GERAR E COPIAR</button>
+        <button class="btn-menu" style="background: #444;" onclick="voltar()">VOLTAR</button>
+    </div>
+
+    <div id="prisao" class="container hidden">
+        <h1>REGISTRO DE PRISÃO</h1>
+
+        <div class="form-group">
+            <label>Foto do Inventário:</label>
+            <input type="file" id="pr-img" accept="image/*">
+            <div id="status-pr" class="status-ia"></div>
+        </div>
+
+        <div class="form-group">
+            <label>Conduta do Suspeito:</label>
+            <select id="pr-conduta">
+                <option value="colaborou">Colaborou com a abordagem</option>
+                <option value="fuga">Tentativa de Fuga</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Cúmplices:</label>
+            <select id="pr-grupo">
+                <option value="sozinho">Agindo Sozinho</option>
+                <option value="grupo">Em Grupo (+1)</option>
+            </select>
+        </div>
+
+        <button class="btn-menu" style="background: var(--success);" onclick="gerarPrisao()">GERAR E COPIAR</button>
+        <button class="btn-menu" style="background: #444;" onclick="voltar()">VOLTAR</button>
+    </div>
+
+    <textarea id="temp-copy" style="position: absolute; left: -9999px;"></textarea>
+
+    <script>
+        // Mensagens aleatórias conforme seu modelo
+        const msgAcao = [
+            "Indivíduo recebeu voz de abordagem e iniciou tentativa de fuga, desobedecendo ordens diretas, resultando no uso de força letal.",
+            "Houve resistência ativa após rendição inicial, culminando na neutralização técnica do suspeito pela guarnição.",
+            "Durante a incursão, o suspeito investiu contra os oficiais, sendo necessária a intervenção com armamento pesado."
+        ];
+
+        const msgEncontrado = [
+            "Vítima localizada em decúbito dorsal em área aberta, apresentando perfurações de alto calibre.",
+            "Corpo encontrado por patrulhamento em local preservado; óbito confirmado no local.",
+            "Indivíduo localizado sem sinais vitais; análise técnica aponta morte imediata pós-confronto."
+        ];
+
+        // Lista de itens que a IA vai tentar identificar no texto da imagem
+        const dicionarioItens = ["Rádio", "Pistola", "Fuzil", "Munição", "Algema", "Colete", "Droga", "Dinheiro"];
+
+        function abrir(tela) {
+            document.getElementById('home').classList.add('hidden');
+            document.getElementById(tela).classList.remove('hidden');
+        }
+
+        function voltar() {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById('home').classList.remove('hidden');
+        }
+
+        async function lerImagem(inputEl, statusEl) {
+            const file = inputEl.files[0];
+            if (!file) return "";
+            
+            document.getElementById(statusEl).innerText = "IA Analisando imagem... aguarde.";
+            try {
+                const result = await Tesseract.recognize(file, 'por');
+                document.getElementById(statusEl).innerText = "Análise concluída!";
+                const textoImg = result.data.text;
+                
+                let itensAchados = [];
+                dicionarioItens.forEach(item => {
+                    if (textoImg.toLowerCase().includes(item.toLowerCase())) {
+                        itensAchados.push(`1x ${item}`);
+                    }
+                });
+                return itensAchados.length > 0 ? itensAchados.join("\n") : "Nenhum item identificado";
+            } catch (e) {
+                document.getElementById(statusEl).innerText = "Erro ao ler imagem.";
+                return "Erro na análise da imagem";
+            }
+        }
+
+        async function gerarPericia() {
+            const tipo = document.getElementById('p-tipo').value;
+            const local = document.getElementById('p-local').value;
+            const itens = await lerImagem(document.getElementById('p-img'), 'status-p');
+            
+            const randomMsg = tipo === 'acao' 
+                ? msgAcao[Math.floor(Math.random() * msgAcao.length)] 
+                : msgEncontrado[Math.floor(Math.random() * msgEncontrado.length)];
+
+            let relatorio = `**RELATÓRIO DE PERÍCIA CRIMINAL**\n`;
+            relatorio += `**DATA:** ${new Date().toLocaleDateString('pt-BR')} | **HORA:** ${new Date().toLocaleTimeString('pt-BR')}\n`;
+            relatorio += `**LOCALIZAÇÃO:** Área de ${local}\n`;
+            relatorio += `**INTRODUÇÃO:** ${randomMsg}\n\n`;
+            relatorio += `**MOCHILA DA VÍTIMA:**\n${itens}\n\n`;
+            relatorio += `**CONCLUSÃO:** Indivíduo foi a óbito no local. Itens e corpo encaminhados para os procedimentos legais.`;
+
+            copiar(relatorio);
+        }
+
+        async function gerarPrisao() {
+            const conduta = document.getElementById('pr-conduta').value;
+            const grupo = document.getElementById('pr-grupo').value;
+            const itens = await lerImagem(document.getElementById('pr-img'), 'status-pr');
+
+            let relatorio = `**RESUMO DE PRISÃO**\n`;
+            relatorio += `**CONDUTA:** ${conduta === 'fuga' ? 'Tentativa de Fuga / Desobediência' : 'Colaborou com a equipe'}\n`;
+            relatorio += `**FORMAÇÃO:** ${grupo === 'sozinho' ? 'Sozinho' : 'Em grupo'}\n\n`;
+            relatorio += `**ITENS APREENDIDOS:**\n${itens}\n\n`;
+            relatorio += `**ARTIGOS:** Aplicados conforme posse de itens e conduta registrada.`;
+
+            copiar(relatorio);
+        }
+
+        function copiar(texto) {
+            const temp = document.getElementById('temp-copy');
+            temp.value = texto;
+            temp.select();
+            document.execCommand('copy');
+            alert("Relatório gerado e copiado para o seu teclado!");
+        }
+    </script>
+</body>
+</html>
