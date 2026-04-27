@@ -3,146 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Forense Pro V3</title>
+    <title>Sistema Forense - Oficial</title>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        :root { --bg: #0d0d0d; --card: #161616; --primary: #007bff; --success: #28a745; --text: #e0e0e0; --border: #333; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; justify-content: center; padding: 20px; margin: 0; }
-        .container { background: var(--card); padding: 30px; border-radius: 12px; width: 100%; max-width: 650px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); border: 1px solid #222; }
-        h1 { font-size: 1.3rem; text-align: center; color: var(--primary); text-transform: uppercase; margin-bottom: 25px; border-bottom: 2px solid #222; padding-bottom: 15px; }
+        :root { --bg: #0a0a0a; --card: #121212; --primary: #0084ff; --success: #22c55e; --text: #f0f0f0; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: var(--card); border: 1px solid #222; border-radius: 12px; width: 90%; max-width: 700px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        h1 { text-align: center; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); font-size: 1.4rem; margin-bottom: 30px; border-bottom: 1px solid #222; padding-bottom: 15px; }
         .hidden { display: none; }
-        .form-section { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #222; }
-        .section-title { font-size: 0.9rem; color: var(--primary); font-weight: bold; text-transform: uppercase; margin-bottom: 15px; }
+        
+        /* Menu */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .btn-menu { background: #1a1a1a; border: 1px solid var(--primary); color: white; padding: 40px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 1rem; }
+        .btn-menu:hover { background: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,132,255,0.3); }
+
+        /* Form */
+        .section { margin-bottom: 25px; background: #181818; padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary); }
+        .section-title { font-size: 0.8rem; font-weight: bold; color: var(--primary); text-transform: uppercase; margin-bottom: 15px; display: block; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 12px; background: #1f1f1f; border: 1px solid var(--border); color: #fff; border-radius: 6px; box-sizing: border-box; }
+        label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; background: #0f0f0f; border: 1px solid #333; color: white; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
+        input:focus { border-color: var(--primary); outline: none; }
         .row { display: flex; gap: 15px; }
-        .row .form-group { flex: 1; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; text-transform: uppercase; }
-        .btn-green { background: var(--success); color: white; }
-        .btn-green:disabled { background: #2a4d36; color: #888; cursor: not-allowed; }
-        .btn-gray { background: #333; color: #aaa; }
-        .status-ia { font-size: 11px; color: #f1c40f; margin-top: 6px; font-family: monospace; }
-        .upload-area { border: 2px dashed #333; padding: 15px; text-align: center; border-radius: 8px; cursor: pointer; }
-        .upload-area:hover { border-color: var(--primary); }
+        .row div { flex: 1; }
+
+        /* IA Upload */
+        .upload-zone { border: 2px dashed #333; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 10px; }
+        .upload-zone:hover { border-color: var(--primary); background: #1e1e1e; }
+        .status { font-size: 11px; font-family: monospace; color: #eab308; margin-top: 5px; }
+
+        /* Buttons */
+        .btn-action { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; font-size: 0.9rem; }
+        .btn-confirm { background: var(--success); color: white; }
+        .btn-back { background: #333; color: #ccc; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="pericia" class="container">
-        <h1>Relatório de Perícia</h1>
-        
-        <div class="form-section">
-            <div class="section-title">🆔 Agentes</div>
-            <div class="row">
-                <div class="form-group"><label>Discord Perito:</label><input type="text" id="p-perito" value="67615"></div>
-                <div class="form-group"><label>Discord Auxiliar:</label><input type="text" id="p-auxiliar" placeholder="na"></div>
-            </div>
+    <div id="home" class="container">
+        <h1>Departamento de Perícia</h1>
+        <div class="menu-grid">
+            <button class="btn-menu" onclick="nav('pericia')">📝 NOVA PERÍCIA<br><small style="font-weight:normal;opacity:0.6">Óbito e Confronto</small></button>
+            <button class="btn-menu" style="border-color: #f97316;" onclick="nav('prisao')">⚖️ REGISTRO PRISÃO<br><small style="font-weight:normal;opacity:0.6">MDT e Itens</small></button>
         </div>
-
-        <div class="form-section">
-            <div class="section-title">📍 Local e Causa</div>
-            <div class="form-group"><label>Referência:</label><input type="text" id="p-ref" placeholder="Vermelho / Arcadius"></div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Terreno:</label>
-                    <select id="p-terreno"><option value="Edificação">Edificação</option><option value="Plano">Plano</option><option value="Montanhoso">Montanhoso</option></select>
-                </div>
-                <div class="form-group">
-                    <label>Causa:</label>
-                    <select id="p-tipo"><option value="acao">Disparo / Confronto</option><option value="encontrado">Encontrado</option></select>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <div class="section-title">📸 Upload MDT (Dados)</div>
-            <div class="upload-area" onclick="document.getElementById('file-mdt').click()">Clique para subir SS do MDT</div>
-            <input type="file" id="file-mdt" class="hidden" accept="image/*">
-            <div id="st-mdt" class="status-ia">Aguardando...</div>
-            <div class="row">
-                <div class="form-group"><label>Nome:</label><input type="text" id="p-nome"></div>
-                <div class="form-group"><label>ID:</label><input type="text" id="p-doc"></div>
-            </div>
-            <div class="row">
-                <div class="form-group"><label>Idade:</label><input type="text" id="p-idade"></div>
-                <div class="form-group"><label>Porte:</label><input type="text" id="p-porte"></div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <div class="section-title">🎒 Upload Mochila (Itens)</div>
-            <div class="upload-area" onclick="document.getElementById('file-inv').click()">Clique para subir SS da Mochila</div>
-            <input type="file" id="file-inv" class="hidden" accept="image/*">
-            <div id="st-inv" class="status-ia">Aguardando...</div>
-            <textarea id="p-itens" rows="3" placeholder="Itens aparecerão aqui..."></textarea>
-        </div>
-
-        <button id="btn-gerar" class="btn btn-green" onclick="gerar()">Gerar e Copiar Relatório</button>
     </div>
 
-    <textarea id="helper" style="position: absolute; left: -9999px;"></textarea>
+    <div id="pericia" class="container hidden">
+        <h1>Laudo Pericial</h1>
+        
+        <div class="section">
+            <span class="section-title">Agentes Responsáveis</span>
+            <div class="row">
+                <div><label>ID Discord Perito</label><input type="text" id="p-perito" value="67615"></div>
+                <div><label>ID Discord Auxiliar</label><input type="text" id="p-auxiliar" value="na"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-title">Local e Circunstância</span>
+            <div class="form-group"><label>Referência do Local</label><input type="text" id="p-ref" placeholder="Ex: Atrás do estacionamento Vermelho"></div>
+            <div class="row">
+                <div>
+                    <label>Tipo de Terreno</label>
+                    <select id="p-terreno">
+                        <option value="Edificação">Edificação / Prédios</option>
+                        <option value="Via Pública">Via Pública / Calçada</option>
+                        <option value="Mata">Mata / Montanhoso</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Causa Morte</label>
+                    <select id="p-tipo">
+                        <option value="acao">Disparos (Pistola/Fuzil)</option>
+                        <option value="encontrado">Encontrado (Sem sinais)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-title">IA: Leitura de MDT</span>
+            <div class="upload-zone" onclick="document.getElementById('img-mdt').click()">Clique para anexar Print do MDT</div>
+            <input type="file" id="img-mdt" class="hidden" accept="image/*">
+            <div id="st-mdt" class="status">Aguardando imagem...</div>
+            <div class="row">
+                <div><label>Nome Completo</label><input type="text" id="p-nome"></div>
+                <div><label>ID / Passaporte</label><input type="text" id="p-doc"></div>
+            </div>
+            <div class="row">
+                <div><label>Idade</label><input type="text" id="p-idade"></div>
+                <div><label>Porte de Arma</label><input type="text" id="p-porte"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <span class="section-title">IA: Leitura de Mochila</span>
+            <div class="upload-zone" onclick="document.getElementById('img-inv').click()">Clique para anexar Print da Mochila</div>
+            <input type="file" id="img-inv" class="hidden" accept="image/*">
+            <div id="st-inv" class="status">Aguardando imagem...</div>
+            <textarea id="p-itens" rows="3" placeholder="Os itens detecatados aparecerão aqui..."></textarea>
+        </div>
+
+        <button class="btn-action btn-confirm" onclick="gerarRelatorio()">Gerar e Copiar Relatório Oficial</button>
+        <button class="btn-action btn-back" onclick="nav('home')">Voltar ao Menu</button>
+    </div>
+
+    <div id="prisao" class="container hidden">
+        <h1>Registro de Prisão</h1>
+        <p style="text-align:center; color:#666;">Use a perícia para coletar os dados por enquanto.</p>
+        <button class="btn-action btn-back" onclick="nav('home')">Voltar</button>
+    </div>
+
+    <textarea id="copy-area" style="position: absolute; left: -9999px;"></textarea>
 
     <script>
-        const dicionario = [
-            {k: "parafall", n: "Fuzil Parafall"}, {k: "pistola", n: "Pistola"},
-            {k: "radio", n: "Rádio"}, {k: "cristal", n: "Cristal (Droga)"},
-            {k: "muni", n: "Munições"}, {k: "colete", n: "Colete Balístico"}
+        function nav(id) {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        const dicionarioItens = [
+            {k: "parafall", n: "1x PARAFALL"}, {k: "radio", n: "1x RÁDIO"},
+            {k: "cristal", n: "Cristal (Entorpecente)"}, {k: "muni", n: "Munições de Fuzil/Pistola"},
+            {k: "pistola", n: "1x Pistola"}, {k: "algema", n: "Algemas"}
         ];
 
         async function processarIA(file, statusId, callback) {
             const status = document.getElementById(statusId);
-            status.innerText = "⏳ Processando imagem...";
+            status.innerText = "⏳ IA ANALISANDO... (Aguarde)";
             try {
+                // Tesseract rodando direto do CDN para o GitHub Pages
                 const { data: { text } } = await Tesseract.recognize(file, 'por');
-                status.innerText = "✅ Concluído!";
+                status.innerText = "✅ LEITURA CONCLUÍDA";
                 callback(text.toLowerCase(), text);
             } catch (e) {
-                status.innerText = "❌ Erro na leitura. Tente novamente.";
+                status.innerText = "⚠️ FALHA NA IA. PREENCHA MANUALMENTE.";
                 console.error(e);
             }
         }
 
-        document.getElementById('file-mdt').addEventListener('change', e => {
+        // Lógica para o MDT Escuro
+        document.getElementById('img-mdt').addEventListener('change', e => {
             processarIA(e.target.files[0], 'st-mdt', (low, raw) => {
-                // Tenta pegar o nome (Ex: Connor Ferrari [123])
-                const match = raw.match(/(.+?)\[(\d+)\]/);
-                if(match) {
-                    document.getElementById('p-nome').value = match[1].trim();
-                    document.getElementById('p-doc').value = match[2].trim();
-                }
+                // Tenta pegar Nome (Normalmente está abaixo ou acima do texto 'Nome')
+                const lines = raw.split('\n');
+                lines.forEach((line, i) => {
+                    if(line.toLowerCase().includes("identidade")) {
+                        const nextLine = lines[i+1] || "";
+                        document.getElementById('p-doc').value = nextLine.replace(/\D/g, "");
+                    }
+                });
+
+                // Detecção rápida de Porte e Nome
                 if(low.includes("desabilitado")) document.getElementById('p-porte').value = "Desabilitado";
                 else if(low.includes("habilitado")) document.getElementById('p-porte').value = "Habilitado";
+                
+                // Se encontrar um padrão de nome (duas palavras maiúsculas)
+                const nomeMatch = raw.match(/[A-Z][a-z]+ [A-Z][a-z]+/);
+                if(nomeMatch) document.getElementById('p-nome').value = nomeMatch[0];
             });
         });
 
-        document.getElementById('file-inv').addEventListener('change', e => {
+        // Lógica para Mochila
+        document.getElementById('img-inv').addEventListener('change', e => {
             processarIA(e.target.files[0], 'st-inv', (low) => {
-                let achados = [];
-                dicionario.forEach(i => { if(low.includes(i.k)) achados.push("- " + i.n); });
-                document.getElementById('p-itens').value = achados.length > 0 ? achados.join("\n") : "N/A";
+                let itens = [];
+                dicionarioItens.forEach(item => {
+                    if(low.includes(item.k)) itens.push(item.n);
+                });
+                document.getElementById('p-itens').value = itens.length > 0 ? itens.join("\n") : "N/A";
             });
         });
 
-        function gerar() {
+        function gerarRelatorio() {
             const d = id => document.getElementById(id).value;
             const agora = new Date();
             const data = agora.toLocaleDateString('pt-BR');
             const hora = agora.getHours().toString().padStart(2, '0') + ":" + agora.getMinutes().toString().padStart(2, '0');
 
-            let txt = `5RELATÓRIO DE PERÍCIA CRIMINAL\n\n`;
-            txt += `IDENTIFICAÇÃO\nData da pericia: ${data}\nHora da pericia: ${hora}\n`;
-            txt += `Perito responsável: <@${d('p-perito')}>\nAuxiliares: <@${d('p-auxiliar')}>\nDocumento do Suspeito: ${d('p-doc')}\n\n`;
-            txt += `INTRODUÇÃO:\nA Perícia foi realizada após uma ocorrência nas imediações de ${d('p-ref')}.\n\n`;
-            txt += `DESCRIÇÃO DO LOCAL:\nO fato ocorreu perto de ${d('p-ref')}. Terreno tipo ${d('p-terreno')}.\n\n`;
-            txt += `DADOS DA VÍTIMA:\nIndentidade: ${d('p-doc')}\nNome: ${d('p-nome')}\nIdade: ${d('p-idade')}\nPorte: ${d('p-porte')}\n\n`;
-            txt += `ANÁLISE DO CADAVER:\nIndivíduo encontrado com perfurações de projéteis. Óbito confirmado no local.\n\n`;
-            txt += `MOCHILA DA VÍTIMA:\n${d('p-itens')}\n\n`;
-            txt += `CONCLUSÃO:\nConstatada morte cerebral por disparos de arma de fogo. Vítima faleceu nas imediações de ${d('p-ref')}.`;
+            let r = `5RELATÓRIO DE PERÍCIA CRIMINAL\n\n`;
+            r += `IDENTIFICAÇÃO\nData da pericia: ${data}\nHora da pericia: ${hora}\n`;
+            r += `Perito responsável: <@${d('p-perito')}>\nAuxiliares: <@${d('p-auxiliar')}>\nDocumento do Suspeito: ${d('p-doc')}\n\n`;
+            r += `INTRODUÇÃO:\nA Perícia foi realizada após uma QRU de Disparo na redondeza de ${d('p-ref')}.\n\n`;
+            r += `DESCRIÇÃO DO LOCAL:\nO fato ocorreu nas imediações de ${d('p-ref')}, terreno caracterizado como ${d('p-terreno')}. Indivíduo foi a óbito no local.\n\n`;
+            r += `DADOS DA VÍTIMA:\nIndentidade: ${d('p-doc')}\nNome: ${d('p-nome')}\nIdade: ${d('p-idade')}\nPrisões: 0\nMandatos: 0\nPorte: ${d('p-porte')}\n\n`;
+            r += `ANÁLISE DO CADAVER:\nIndivíduo encontrado em decúbito dorsal com perfurações de projéteis de calibre de pistola e fuzil. Óbito constatado imediatamente.\n\n`;
+            r += `MOCHILA DA VÍTIMA:\n${d('p-itens')}\n\n`;
+            r += `CONCLUSÃO:\nCom base na análise, foi constatada morte cerebral por disparos de arma de fogo. Vítima veio a falecer nas imediações de ${d('p-ref')}.`;
 
-            const h = document.getElementById('helper');
-            h.value = txt; h.select(); document.execCommand('copy');
-            alert("Copiado!");
+            const helper = document.getElementById('copy-area');
+            helper.value = r; helper.select(); document.execCommand('copy');
+            alert("Relatório Gerado e Copiado!");
         }
     </script>
 </body>
